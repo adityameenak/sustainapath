@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sustainapath - Process Flow Diagram</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+  <!-- Add Mermaid script directly -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.jpg">
+  
+  <!-- Initialize Mermaid -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing Mermaid...');
+      mermaid.initialize({ 
+        startOnLoad: true,
+        theme: 'dark',
+        securityLevel: 'loose',
+        flowchart: {
+          curve: 'basis',
+          nodeSpacing: 60,
+          rankSpacing: 60,
+          padding: 20
+        }
+      });
+      console.log('Mermaid initialized');
+    });
+  </script>
+
+  <style>
+    :root {
+      --green-glow: #22c55e;
+      --background-dark: #0f172a;
+      --text-light: #d1fae5;
+      --panel-bg: #1e293b;
+      --accent-color: #22c55e;
+      --hover-color: #16a34a;
+      --border-glow: rgba(34, 197, 94, 0.2);
+    }
+
+    body {
+      background: var(--background-dark);
+      color: var(--text-light);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.05) 0%, transparent 50%),
+        linear-gradient(rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.95));
+    }
+
+    .split {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    .gutter {
+      background-color: #2d3748;
+      background-repeat: no-repeat;
+      background-position: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .gutter:hover {
+      background-color: #374151;
+    }
+
+    .gutter.gutter-horizontal {
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+      cursor: col-resize;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      padding: 1.5rem;
+      overflow-y: auto;
+      border-radius: 8px;
+      margin: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--panel-bg);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border-glow);
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: var(--background-dark);
+      padding: 0.625rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background-color: var(--hover-color);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+    }
+
+    .node-editor {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+
+    .node-editor:hover {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.1);
+    }
+
+    .node-input {
+      width: 100%;
+      background: rgba(47, 77, 46, 0.6);
+      border: 2px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .node-input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+      background: rgba(47, 77, 46, 0.8);
+    }
+
+    #diagram-container {
+      padding: 1.5rem;
+      min-height: 500px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+
+    #diagram-container:hover {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.1);
+    }
+
+    .mermaid {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 1.5rem;
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+
+    .mermaid:hover {
+      transform: scale(1.01);
+    }
+
+    .node-list {
+      margin-top: 1.5rem;
+    }
+
+    .node-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-glow);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .node-item:hover {
+      border-color: var(--accent-color);
+      background: rgba(15, 23, 42, 0.8);
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .node-item.selected {
+      border-color: var(--accent-color);
+      background: rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+    }
+
+    select.node-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2322c55e'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .loading::after {
+      content: '';
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border-glow);
+      border-top-color: var(--accent-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip:hover::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.5rem 1rem;
+      background: var(--panel-bg);
+      color: var(--text-light);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .back-btn {
+      background-color: var(--accent-color);
+      color: var(--background-dark);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      margin-left: auto;
+    }
+
+    .back-btn:hover {
+      background-color: var(--hover-color);
+    }
+
+    .equipment-library {
+      position: fixed;
+      left: 0;
+      top: 60px;
+      bottom: 0;
+      width: 250px;
+      background: var(--panel-bg);
+      padding: 1rem;
+      border-right: 1px solid var(--border-glow);
+      overflow-y: auto;
+      z-index: 90;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .equipment-library.open {
+      transform: translateX(0);
+    }
+
+    .equipment-item {
+      padding: 0.75rem;
+      border: 1px solid var(--border-glow);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .equipment-item:hover {
+      border-color: var(--accent-color);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .zoom-controls {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+    }
+
+    .zoom-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-glow);
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .zoom-btn:hover {
+      border-color: var(--accent-color);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .properties-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-glow);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .property-group {
+      margin-bottom: 1rem;
+    }
+
+    .property-group h4 {
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .connection-handle {
+      width: 12px;
+      height: 12px;
+      background: var(--accent-color);
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+      z-index: 100;
+    }
+
+    .connection-handle:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .connection-line {
+      stroke: var(--accent-color);
+      stroke-width: 2;
+      fill: none;
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+
+    .connection-line:hover {
+      stroke-width: 3;
+      filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.3));
+    }
+
+    .stream-type-selector {
+      position: absolute;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-glow);
+      border-radius: 6px;
+      padding: 0.5rem;
+      z-index: 1000;
+    }
+
+    .stream-type-option {
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .stream-type-option:hover {
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+/* Node Styles */
+.node.reactor {
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.node.heat-exchanger {
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.node.separator {
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.node.pump {
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* Connection Styles */
+.connection-line.process-flow {
+  stroke: #22c55e;
+}
+
+.connection-line.cooling-water {
+  stroke: #3b82f6;
+  stroke-dasharray: 4;
+}
+
+.connection-line.steam {
+  stroke: #ef4444;
+  stroke-dasharray: 8;
+}
+
+.connection-line.waste {
+  stroke: #f59e0b;
+  stroke-dasharray: 4 1;
+}
+  </style>
+</head>
+
+<body>
+  <div class="toolbar">
+    <h1 class="text-xl font-bold text-green-400 flex-grow flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      Process Flow Diagram Editor
+    </h1>
+    <button onclick="exportDiagram()" class="btn btn-secondary tooltip" data-tooltip="Export as PNG">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      Export
+    </button>
+    <a href="analysis.html" class="btn tooltip" data-tooltip="Return to Analysis">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+      </svg>
+      Back to Analysis
+    </a>
+    <button onclick="toggleEquipmentLibrary()" class="btn btn-secondary tooltip" data-tooltip="Equipment Library">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+      Library
+    </button>
+  </div>
+
+  <div class="equipment-library" id="equipment-library">
+    <h3 class="text-lg font-semibold mb-3">Equipment Library</h3>
+    <div class="equipment-item" onclick="addEquipment('reactor')">
+      <h4>Reactor</h4>
+      <small>CSTR, PFR, Batch</small>
+    </div>
+    <div class="equipment-item" onclick="addEquipment('heat-exchanger')">
+      <h4>Heat Exchanger</h4>
+      <small>Shell & Tube, Plate</small>
+    </div>
+    <div class="equipment-item" onclick="addEquipment('separator')">
+      <h4>Separator</h4>
+      <small>Flash, Distillation</small>
+    </div>
+    <div class="equipment-item" onclick="addEquipment('pump')">
+      <h4>Pump</h4>
+      <small>Centrifugal, Positive Displacement</small>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="panel editor-panel" id="left-panel">
+      <div class="node-editor">
+        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Process Description
+        </h3>
+        <textarea 
+          id="prompt" 
+          class="node-input" 
+          style="min-height: 120px"
+          placeholder="Describe your chemical process here..."
+        ></textarea>
+        <button onclick="generatePFD()" class="btn w-full flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Generate Diagram
+        </button>
+      </div>
+
+      <div class="node-editor">
+        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Node
+        </h3>
+        <input 
+          type="text" 
+          id="node-label" 
+          class="node-input" 
+          placeholder="Enter node label..."
+        >
+        <select id="node-type" class="node-input">
+          <option value="process">Process Step</option>
+          <option value="input">Input Material</option>
+          <option value="output">Output Product</option>
+          <option value="condition">Condition</option>
+        </select>
+        <input 
+          type="text" 
+          id="node-details" 
+          class="node-input" 
+          placeholder="Enter conditions (temp, pressure, etc.)"
+        >
+        <div class="flex gap-3">
+          <button onclick="updateNode()" class="btn flex-grow flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Update
+          </button>
+          <button onclick="deleteNode()" class="btn btn-secondary flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="node-list" id="node-list">
+        <!-- Nodes will be listed here -->
+      </div>
+    </div>
+
+    <div class="panel" id="right-panel">
+      <div id="diagram-container"></div>
+    </div>
+  </div>
+
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="zoomOut()">-</button>
+    <button class="zoom-btn" onclick="resetZoom()">⟲</button>
+  </div>
+
+  <script>
+    // Initialize split panels
+    document.addEventListener('DOMContentLoaded', function() {
+      Split(['#left-panel', '#right-panel'], {
+        sizes: [30, 70],
+        minSize: [300, 500],
+        gutterSize: 10,
+        snapOffset: 0,
+      });
+    });
+
+    let currentDiagram = null;
+    let selectedNode = null;
+
+    async function generatePFD() {
+      const prompt = document.getElementById('prompt').value;
+      if (!prompt) {
+        alert("Please enter a process description.");
+        return;
+      }
+
+      try {
+        // Show loading indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        document.body.appendChild(loadingDiv);
+
+        console.log('Sending request to backend...');
+        const response = await fetch("http://localhost:8000/api/v1/process/pfd", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            prompt: prompt,
+            include_details: true
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received data from backend:', data);
+        
+        // Create our diagram structure from the response
+        currentDiagram = {
+          nodes: data.nodes.map(node => ({
+            id: node.id,
+            label: node.label,
+            type: node.type || 'process',
+            details: node.details || '',
+            properties: node.properties || {}
+          })),
+          connections: data.connections || []
+        };
+        
+        console.log('Created diagram structure:', currentDiagram);
+        
+        // Store both the diagram and the prompt
+        localStorage.setItem('active_process_diagram', JSON.stringify(currentDiagram));
+        localStorage.setItem('active_process_description', prompt);
+        
+        await renderDiagram();
+        updateNodeList();
+      } catch (error) {
+        console.error("Error generating diagram:", error);
+        alert("Failed to generate diagram. Please check the console for details.");
+      } finally {
+        // Remove loading indicator
+        const loadingDiv = document.querySelector('.loading');
+        if (loadingDiv) loadingDiv.remove();
+      }
+    }
+
+    async function renderDiagram() {
+      if (!currentDiagram) {
+        console.log('No diagram data to render');
+        return;
+      }
+      
+      try {
+        console.log('Starting diagram rendering...');
+        // Clear the container first
+        const container = document.getElementById('diagram-container');
+        container.innerHTML = '';
+        
+        // Create the mermaid diagram code
+        let mermaidCode = ['graph TD'];
+        
+        // Add nodes with their styles
+        currentDiagram.nodes.forEach(node => {
+          const nodeStyle = getNodeStyle(node.type);
+          const details = node.details ? `<br>${node.details}` : '';
+          const nodeDefinition = `  ${node.id}["${node.label}${details}"${nodeStyle}]`;
+          mermaidCode.push(nodeDefinition);
+          console.log('Added node:', nodeDefinition);
+        });
+        
+        // Add connections
+        if (currentDiagram.connections) {
+          currentDiagram.connections.forEach(conn => {
+            const connectionDefinition = conn.label 
+              ? `  ${conn.from} -->|"${conn.label}"| ${conn.to}`
+              : `  ${conn.from} --> ${conn.to}`;
+            mermaidCode.push(connectionDefinition);
+            console.log('Added connection:', connectionDefinition);
+          });
+        }
+        
+        const finalMermaidCode = mermaidCode.join('\n');
+        console.log('Generated Mermaid code:', finalMermaidCode);
+        
+        // Create a new div for the diagram
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        mermaidDiv.textContent = finalMermaidCode;
+        container.appendChild(mermaidDiv);
+        
+        console.log('Running Mermaid...');
+        await mermaid.run({nodes: [mermaidDiv]});
+        console.log('Mermaid rendering complete');
+        
+        // Initialize connection handles after rendering
+        setTimeout(initializeConnectionHandles, 500);
+      } catch (error) {
+        console.error('Error rendering diagram:', error);
+        const container = document.getElementById('diagram-container');
+        container.innerHTML = `
+          <div class="text-red-500 p-4">
+            Error rendering diagram. Please check the console for details.<br>
+            Error: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    function updateNodeList() {
+      if (!currentDiagram || !currentDiagram.nodes) return;
+
+      const nodeList = document.getElementById('node-list');
+      nodeList.innerHTML = '';
+
+      currentDiagram.nodes.forEach(node => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'node-item';
+        nodeEl.innerHTML = `
+          <div class="font-semibold">${node.label}</div>
+          <div class="text-sm opacity-75">${node.type}</div>
+        `;
+        nodeEl.onclick = () => selectNode(node);
+        nodeList.appendChild(nodeEl);
+      });
+    }
+
+    let zoomLevel = 1;
+    const ZOOM_STEP = 0.1;
+    const MAX_ZOOM = 2;
+    const MIN_ZOOM = 0.5;
+
+    function zoomIn() {
+      if (zoomLevel < MAX_ZOOM) {
+        zoomLevel += ZOOM_STEP;
+        applyZoom();
+      }
+    }
+
+    function zoomOut() {
+      if (zoomLevel > MIN_ZOOM) {
+        zoomLevel -= ZOOM_STEP;
+        applyZoom();
+      }
+    }
+
+    function resetZoom() {
+      zoomLevel = 1;
+      applyZoom();
+    }
+
+    function applyZoom() {
+      const container = document.querySelector('#diagram-container');
+      container.style.transform = `scale(${zoomLevel})`;
+      container.style.transformOrigin = 'center center';
+    }
+
+    function toggleEquipmentLibrary() {
+      const library = document.getElementById('equipment-library');
+      library.classList.toggle('open');
+    }
+
+    function addEquipment(type) {
+      if (!currentDiagram) {
+        currentDiagram = {
+          nodes: [],
+          connections: []
+        };
+      }
+
+      const equipmentTypes = {
+        'reactor': {
+          label: 'Reactor',
+          details: 'Operating Temperature: \nOperating Pressure: \nVolume: ',
+          properties: {
+            type: 'CSTR',
+            volume: '1000L',
+            moc: 'Stainless Steel 316',
+            temperature: '25°C',
+            pressure: '1 bar'
+          }
+        },
+        'heat-exchanger': {
+          label: 'Heat Exchanger',
+          details: 'Hot Side Temp: \nCold Side Temp: \nArea: ',
+          properties: {
+            type: 'Shell & Tube',
+            area: '100m²',
+            duty: '500kW',
+            'hot in': '150°C',
+            'hot out': '80°C',
+            'cold in': '25°C',
+            'cold out': '95°C'
+          }
+        },
+        'separator': {
+          label: 'Separator',
+          details: 'Separation Type: \nEfficiency: \nCapacity: ',
+          properties: {
+            type: 'Flash Drum',
+            pressure: '2 bar',
+            temperature: '65°C',
+            efficiency: '95%',
+            capacity: '500L'
+          }
+        },
+        'pump': {
+          label: 'Pump',
+          details: 'Flow Rate: \nHead: \nPower: ',
+          properties: {
+            type: 'Centrifugal',
+            'flow rate': '100 m³/h',
+            head: '30m',
+            power: '15kW',
+            efficiency: '75%'
+          }
+        }
+      };
+
+      const equipment = equipmentTypes[type];
+      const newNode = {
+        id: `node_${Date.now()}`,
+        label: equipment.label,
+        type: type,
+        details: equipment.details,
+        properties: equipment.properties
+      };
+
+      currentDiagram.nodes.push(newNode);
+      renderDiagram();
+      updateNodeList();
+      
+      // Close the equipment library
+      document.getElementById('equipment-library').classList.remove('open');
+    }
+
+    // Enhance node selection to show more properties
+    function selectNode(node) {
+      selectedNode = node;
+      document.getElementById('node-label').value = node.label;
+      document.getElementById('node-type').value = node.type;
+      document.getElementById('node-details').value = node.details || '';
+
+      // Update properties panel
+      const propertiesHtml = `
+        <div class="property-group">
+          <h4>Equipment Properties</h4>
+          ${Object.entries(node.properties || {}).map(([key, value]) => `
+            <div class="mb-2">
+              <label class="block text-sm opacity-70">${key}</label>
+              <input type="text" class="node-input" value="${value}" 
+                     onchange="updateNodeProperty('${key}', this.value)">
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // Add properties panel if it doesn't exist
+      let propertiesPanel = document.querySelector('.properties-panel');
+      if (!propertiesPanel) {
+        propertiesPanel = document.createElement('div');
+        propertiesPanel.className = 'properties-panel';
+        document.querySelector('.node-editor').appendChild(propertiesPanel);
+      }
+      propertiesPanel.innerHTML = propertiesHtml;
+    }
+
+    function updateNodeProperty(key, value) {
+      if (!selectedNode || !selectedNode.properties) return;
+      selectedNode.properties[key] = value;
+      renderDiagram();
+      updateNodeList();
+    }
+
+    function updateNode() {
+      if (!selectedNode) return;
+
+      const label = document.getElementById('node-label').value;
+      const type = document.getElementById('node-type').value;
+      const details = document.getElementById('node-details').value;
+
+      // Update node in the diagram
+      const nodeIndex = currentDiagram.nodes.findIndex(n => n.id === selectedNode.id);
+      if (nodeIndex !== -1) {
+        currentDiagram.nodes[nodeIndex] = {
+          ...selectedNode,
+          label,
+          type,
+          details
+        };
+      }
+
+      // Update the diagram
+      renderDiagram();
+      updateNodeList();
+    }
+
+    function deleteNode() {
+      if (!selectedNode || !confirm('Are you sure you want to delete this node?')) return;
+
+      // Remove node and its connections
+      currentDiagram.nodes = currentDiagram.nodes.filter(n => n.id !== selectedNode.id);
+      currentDiagram.connections = currentDiagram.connections.filter(
+        c => c.from !== selectedNode.id && c.to !== selectedNode.id
+      );
+
+      selectedNode = null;
+      document.getElementById('node-label').value = '';
+      document.getElementById('node-type').value = 'process';
+      document.getElementById('node-details').value = '';
+
+      renderDiagram();
+      updateNodeList();
+    }
+
+    function exportDiagram() {
+      if (!currentDiagram) return;
+
+      const exportData = {
+        description: document.getElementById('prompt').value,
+        diagram: currentDiagram
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'process_diagram.json';
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    }
+
+    function backToAnalysis() {
+      // Get the stored graph data
+      const storedGraph = localStorage.getItem('active_process_graph');
+      if (!storedGraph) {
+        alert('⚠️ No process data found. Please start from the chat page.');
+        window.location.href = 'chat.html';
+        return;
+      }
+      
+      // Preserve any modifications made to the diagram
+      if (currentDiagram) {
+        localStorage.setItem('active_process_diagram', JSON.stringify(currentDiagram));
+      }
+      
+      window.location.href = 'analysis.html';
+    }
+
+    // Load stored description and diagram from localStorage
+    document.addEventListener("DOMContentLoaded", () => {
+      const storedPrompt = localStorage.getItem("active_process_description");
+      const storedDiagram = localStorage.getItem("active_process_diagram");
+      
+      if (storedPrompt) {
+        document.getElementById("prompt").value = storedPrompt;
+      }
+      
+      if (storedDiagram) {
+        currentDiagram = JSON.parse(storedDiagram);
+        renderDiagram();
+        updateNodeList();
+      } else if (storedPrompt) {
+        generatePFD();
+      }
+    });
+
+    let isDrawingConnection = false;
+    let connectionStart = null;
+    let connectionEnd = null;
+    let tempLine = null;
+
+    function initializeConnectionHandles() {
+      const nodes = document.querySelectorAll('.node');
+      nodes.forEach(node => {
+        const input = createConnectionHandle(node, 'input');
+        const output = createConnectionHandle(node, 'output');
+        node.appendChild(input);
+        node.appendChild(output);
+      });
+    }
+
+    function createConnectionHandle(node, type) {
+      const handle = document.createElement('div');
+      handle.className = 'connection-handle';
+      handle.dataset.type = type;
+      handle.style.left = type === 'input' ? '-6px' : 'calc(100% - 6px)';
+      handle.style.top = '50%';
+      handle.style.transform = 'translateY(-50%)';
+      
+      handle.addEventListener('mousedown', startConnection);
+      handle.addEventListener('mouseup', endConnection);
+      return handle;
+    }
+
+    function startConnection(e) {
+      isDrawingConnection = true;
+      connectionStart = {
+        x: e.clientX,
+        y: e.clientY,
+        node: e.target.parentElement.dataset.nodeId,
+        type: e.target.dataset.type
+      };
+      
+      tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      tempLine.setAttribute('class', 'connection-line');
+      document.querySelector('svg').appendChild(tempLine);
+    }
+
+    function updateConnection(e) {
+      if (!isDrawingConnection) return;
+      
+      const endX = e.clientX;
+      const endY = e.clientY;
+      
+      const path = `M ${connectionStart.x} ${connectionStart.y} C ${connectionStart.x + 100} ${connectionStart.y}, ${endX - 100} ${endY}, ${endX} ${endY}`;
+      tempLine.setAttribute('d', path);
+    }
+
+    function endConnection(e) {
+      if (!isDrawingConnection) return;
+      
+      connectionEnd = {
+        node: e.target.parentElement.dataset.nodeId,
+        type: e.target.dataset.type
+      };
+      
+      if (isValidConnection()) {
+        showStreamTypeSelector(e.clientX, e.clientY);
+      } else {
+        cancelConnection();
+      }
+      
+      isDrawingConnection = false;
+    }
+
+    function isValidConnection() {
+      return connectionStart.node !== connectionEnd.node &&
+             connectionStart.type !== connectionEnd.type;
+    }
+
+    function showStreamTypeSelector(x, y) {
+      const selector = document.createElement('div');
+      selector.className = 'stream-type-selector';
+      selector.style.left = `${x}px`;
+      selector.style.top = `${y}px`;
+      
+      const streamTypes = [
+        { name: 'Process Flow', color: '#22c55e' },
+        { name: 'Cooling Water', color: '#3b82f6' },
+        { name: 'Steam', color: '#ef4444' },
+        { name: 'Waste Stream', color: '#f59e0b' }
+      ];
+      
+      streamTypes.forEach(type => {
+        const option = document.createElement('div');
+        option.className = 'stream-type-option';
+        option.textContent = type.name;
+        option.style.color = type.color;
+        option.onclick = () => createConnection(type);
+        selector.appendChild(option);
+      });
+      
+      document.body.appendChild(selector);
+    }
+
+    function createConnection(streamType) {
+      const connection = {
+        id: `conn_${Date.now()}`,
+        from: connectionStart.node,
+        to: connectionEnd.node,
+        type: streamType.name,
+        style: getConnectionStyle(streamType.name),
+        properties: {
+          flowRate: '0',
+          temperature: '25',
+          pressure: '1',
+          composition: ''
+        }
+      };
+      
+      currentDiagram.connections.push(connection);
+      renderDiagram();
+      
+      // Remove stream type selector
+      document.querySelector('.stream-type-selector').remove();
+    }
+
+    function cancelConnection() {
+      if (tempLine) {
+        tempLine.remove();
+        tempLine = null;
+      }
+    }
+
+    // Enhance renderDiagram to include connection handles
+    const originalRenderDiagram = renderDiagram;
+    renderDiagram = function() {
+      originalRenderDiagram();
+      initializeConnectionHandles();
+    };
+
+    // Add connection properties to node selection
+    function selectConnection(connection) {
+      const propertiesHtml = `
+        <div class="property-group">
+          <h4>Stream Properties</h4>
+          <div class="mb-2">
+            <label class="block text-sm opacity-70">Flow Rate (kg/h)</label>
+            <input type="number" class="node-input" value="${connection.properties.flowRate}"
+                   onchange="updateConnectionProperty('${connection.id}', 'flowRate', this.value)">
+          </div>
+          <div class="mb-2">
+            <label class="block text-sm opacity-70">Temperature (°C)</label>
+            <input type="number" class="node-input" value="${connection.properties.temperature}"
+                   onchange="updateConnectionProperty('${connection.id}', 'temperature', this.value)">
+          </div>
+          <div class="mb-2">
+            <label class="block text-sm opacity-70">Pressure (bar)</label>
+            <input type="number" class="node-input" value="${connection.properties.pressure}"
+                   onchange="updateConnectionProperty('${connection.id}', 'pressure', this.value)">
+          </div>
+          <div class="mb-2">
+            <label class="block text-sm opacity-70">Composition</label>
+            <textarea class="node-input" 
+                      onchange="updateConnectionProperty('${connection.id}', 'composition', this.value)"
+            >${connection.properties.composition}</textarea>
+          </div>
+        </div>
+      `;
+      
+      let propertiesPanel = document.querySelector('.properties-panel');
+      if (!propertiesPanel) {
+        propertiesPanel = document.createElement('div');
+        propertiesPanel.className = 'properties-panel';
+        document.querySelector('.node-editor').appendChild(propertiesPanel);
+      }
+      propertiesPanel.innerHTML = propertiesHtml;
+    }
+
+    function updateConnectionProperty(connectionId, property, value) {
+      const connection = currentDiagram.connections.find(c => c.id === connectionId);
+      if (connection) {
+        connection.properties[property] = value;
+        renderDiagram();
+      }
+    }
+
+    // Add event listeners for connection drawing
+    document.addEventListener('mousemove', updateConnection);
+    document.addEventListener('mouseup', () => {
+      if (isDrawingConnection) {
+        cancelConnection();
+        isDrawingConnection = false;
+      }
+    });
+
+    function getNodeStyle(type) {
+      switch (type) {
+        case 'reactor':
+          return ' class="node reactor"';
+        case 'heat-exchanger':
+          return ' class="node heat-exchanger"';
+        case 'separator':
+          return ' class="node separator"';
+        case 'pump':
+          return ' class="node pump"';
+        case 'input':
+          return ' class="node input"';
+        case 'output':
+          return ' class="node output"';
+        default:
+          return '';
+      }
+    }
+
+    function getConnectionStyle(type) {
+      switch (type) {
+        case 'Process Flow':
+          return 'process-flow';
+        case 'Cooling Water':
+          return 'cooling-water';
+        case 'Steam':
+          return 'steam';
+        case 'Waste Stream':
+          return 'waste';
+        default:
+          return '';
+      }
+    }
+
+    function formatNodeLabel(node) {
+      let label = node.label;
+      
+      if (node.properties) {
+        const props = [];
+        for (const [key, value] of Object.entries(node.properties)) {
+          props.push(`${key}: ${value}`);
+        }
+        if (props.length > 0) {
+          label += '<br><small>' + props.join('<br>') + '</small>';
+        }
+      }
+      
+      return label;
+    }
+  </script>
+</body>
+</html>

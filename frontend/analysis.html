@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sustainapath - Process Analysis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.jpg">
+  <style>
+    body {
+      background: #0f172a;
+      color: #d1fae5;
+      font-family: 'Poppins', sans-serif;
+      padding: 2rem;
+    }
+    .card {
+      background: #1e293b;
+      border-left: 4px solid #22c55e;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+    }
+    .button {
+      position: absolute;
+      top: 1rem;
+      background-color: #22c55e;
+      color: #0f172a;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .button:hover {
+      background-color: #16a34a;
+    }
+    .back-btn {
+      right: 8rem;
+    }
+    .pfd-btn {
+      right: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="chat.html" class="button back-btn">Back to Chat</a>
+  <a href="pfd.html" class="button pfd-btn">View PFD</a>
+
+  <h1 class="text-3xl font-bold mb-4 text-green-400">Process Analysis</h1>
+  <div id="score-summary" class="mb-6"></div>
+  <div id="analysis-container" class="mb-10"></div>
+
+  <script>
+    async function analyze(graph) {
+      try {
+        const payload = {
+          graph: {
+            name: graph.name || "Unnamed Process",
+            description: graph.description || "",
+            nodes: graph.nodes,
+            edges: graph.edges || []
+          },
+          analysis: [],
+          score_before: 0,
+          score_after: 0
+        };
+
+        const res = await fetch("http://localhost:8000/api/v1/process/analyze_graph", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.detail || "Failed to analyze");
+        }
+
+        const result = await res.json();
+
+        document.getElementById("score-summary").innerHTML = `
+          <p class="text-lg">Score before: <span class="text-green-400 font-bold">${result.score_before}</span></p>
+          <p class="text-lg">Score after: <span class="text-green-400 font-bold">${result.score_after}</span></p>
+          <p class="text-sm text-gray-400 mt-2">Improvement: +${result.score_after - result.score_before} points</p>
+        `;
+
+        const container = document.getElementById("analysis-container");
+        container.innerHTML = "";
+        result.analysis.forEach((step, i) => {
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `
+            <p><strong>Step:</strong> ${i + 1}</p>
+            <p><strong>Issue:</strong> ${step.issue}</p>
+            <p><strong>Suggestion:</strong> ${step.suggestion}</p>
+            <p><strong>Impact:</strong> +${step.score_impact} <span class="text-green-300">(${step.category})</span></p>
+          `;
+          container.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("analysis-container").innerHTML = `
+          <div class="card" style="border-left-color: #ef4444;">
+            <p class="text-red-400">⚠️ Error: ${err.message}</p>
+            <p class="text-sm mt-2">Please try going back to chat and starting over.</p>
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Try to get the process data
+      const storedGraph = localStorage.getItem("active_process_graph");
+      const storedDiagram = localStorage.getItem("active_process_diagram");
+      
+      if (!storedGraph && !storedDiagram) {
+        document.getElementById("analysis-container").innerHTML = `
+          <div class="card" style="border-left-color: #ef4444;">
+            <p class="text-red-400">⚠️ No process data found</p>
+            <p class="text-sm mt-2">Please start from the chat page to analyze a process.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Prefer the graph data if available, otherwise use the diagram
+      const data = storedGraph ? JSON.parse(storedGraph) : JSON.parse(storedDiagram);
+      analyze(data);
+    });
+  </script>
+</body>
+</html>

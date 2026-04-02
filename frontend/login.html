@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Sustainapath</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg">
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #d1fae5;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    form {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 300px;
+    }
+
+    input, button {
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #22c55e;
+      color: #0f172a;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #login-message {
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Login</h1>
+  <form id="login-form">
+    <input type="text" name="username" placeholder="Username" required />
+    <input type="password" name="password" placeholder="Password" required />
+    <button type="submit">Log In</button>
+  </form>
+  <div id="login-message"></div>
+
+  <script>
+    const form = document.getElementById("login-form");
+    const msg = document.getElementById("login-message");
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+
+      const data = new URLSearchParams();
+      data.append("username", form.username.value);
+      data.append("password", form.password.value);
+
+      const res = await fetch("http://localhost:8000/api/v1/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: data.toString()
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        localStorage.setItem("token", result.access_token);
+        localStorage.setItem("username", form.username.value);
+        window.location.href = "index.html";
+      } else {
+        msg.textContent = "Login failed. Check your credentials.";
+        msg.style.color = "#f87171";
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sustainapath</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/jpeg" href="assets/favicon.jpg" sizes = "128x128">
+  <style>
+    body {
+      background: #0f172a;
+      color: #d1fae5;
+      font-family: 'Poppins', sans-serif;
+      padding: 2rem;
+    }
+    .card {
+      background: #1e293b;
+      border-left: 4px solid #22c55e;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.1);
+      max-width: 800px;
+      margin: 3rem auto 0 auto;
+    }
+    textarea {
+      background-color: #334155;
+      color: #d1fae5;
+      border: 1px solid #475569;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      width: 100%;
+      min-height: 180px;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    button {
+      background-color: #22c55e;
+      color: #0f172a;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #16a34a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="flex justify-between items-start mb-8 px-2">
+    <div>
+      <a href="index.html" class="text-3xl font-bold text-green-400 hover:underline">Sustainapath</a>
+      <p class="mt-1 text-xl">
+        <span class="text-green-400 font-semibold">Innovate.</span>
+        <span class="text-white font-semibold">Optimize.</span>
+        <span class="text-green-400 font-semibold">Sustain.</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="text-2xl font-semibold text-green-300 mb-4">Describe your chemical process in detail:</h2>
+    <textarea id="process-description" placeholder="e.g. Dissolve 10g of NaCl in 100mL of water..."></textarea>
+    <button onclick="submitProcess()">Analyze Process</button>
+  </div>
+
+  <script>
+    function submitProcess() {
+      const desc = document.getElementById("process-description").value.trim();
+      if (!desc) {
+        alert("Please enter a process description.");
+        return;
+      }
+
+      fetch("http://localhost:8000/api/v1/process/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: desc })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.graph) {
+          localStorage.setItem("active_process_graph", JSON.stringify(data.graph));
+          window.location.href = "analysis.html";
+        } else {
+          alert("No graph returned from backend.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Could not connect to backend.");
+      });
+    }
+  </script>
+</body>
+</html>
